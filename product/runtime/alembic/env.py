@@ -10,7 +10,7 @@ from alembic import context
 
 # Import models for autogenerate
 from db.base import Base
-from runs.models import Run, Worktree
+from runs.models import Run, Worktree, Patch, Approval, Artifact, ProvenanceRecord
 from events.models import RunEvent
 
 # this is the Alembic Config object
