@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentX - Coding Workspace Dashboard</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: #1a1a2e;
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        
+        header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        header p {
+            opacity: 0.8;
+            font-size: 14px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #1a1a2e;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        button {
+            background: #4a90d9;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        button:hover {
+            background: #357abd;
+        }
+        
+        button.secondary {
+            background: #6c757d;
+        }
+        
+        button.secondary:hover {
+            background: #5a6268;
+        }
+        
+        button.success {
+            background: #28a745;
+        }
+        
+        button.success:hover {
+            background: #218838;
+        }
+        
+        button.danger {
+            background: #dc3545;
+        }
+        
+        button.danger:hover {
+            background: #c82333;
+        }
+        
+        .run-list {
+            list-style: none;
+        }
+        
+        .run-item {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .run-item:hover {
+            border-color: #4a90d9;
+            background: #f8f9fa;
+        }
+        
+        .run-item.active {
+            border-color: #4a90d9;
+            background: #e3f2fd;
+        }
+        
+        .run-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .run-id {
+            font-family: monospace;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .run-state {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        
+        .state-created { background: #e9ecef; color: #495057; }
+        .state-queued { background: #fff3cd; color: #856404; }
+        .state-provisioning { background: #d1ecf1; color: #0c5460; }
+        .state-context_building { background: #d4edda; color: #155724; }
+        .state-running { background: #cce5ff; color: #004085; }
+        .state-waiting_approval { background: #f8d7da; color: #721c24; }
+        .state-completed { background: #d4edda; color: #155724; }
+        .state-failed { background: #f8d7da; color: #721c24; }
+        .state-cancelled { background: #e2e3e5; color: #383d41; }
+        
+        .run-goal {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .run-meta {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .detail-panel {
+            display: none;
+        }
+        
+        .detail-panel.active {
+            display: block;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        .section h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #555;
+        }
+        
+        .event-log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .event-item {
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .event-item:last-child {
+            border-bottom: none;
+        }
+        
+        .event-time {
+            color: #858585;
+            font-size: 11px;
+        }
+        
+        .event-type {
+            color: #4ec9b0;
+            font-weight: bold;
+        }
+        
+        .diff-viewer {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .diff-line {
+            white-space: pre;
+            padding: 2px 5px;
+        }
+        
+        .diff-add {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .diff-remove {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .diff-header {
+            color: #666;
+            font-weight: bold;
+        }
+        
+        .approval-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        @media (max-width: 900px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .refresh-btn {
+            float: right;
+            font-size: 12px;
+            padding: 5px 10px;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-left: 5px;
+        }
+        
+        .badge-info { background: #cce5ff; color: #004085; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🔧 AgentX - Coding Workspace</h1>
+            <p>Bounded coding workspace with supervised execution</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- Error Display -->
+        <div id="error-display" class="error" style="display: none;"></div>
+        
+        <div class="two-column">
+            <!-- Left Column: Run List -->
+            <div>
+                <!-- Create Run Form -->
+                <div class="card">
+                    <h2>Create New Run</h2>
+                    <form id="create-run-form">
+                        <div class="form-group">
+                            <label>Repository ID</label>
+                            <input type="text" id="repo-id" placeholder="my-repo" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Task Type</label>
+                            <select id="task-type">
+                                <option value="fix_failing_test">Fix Failing Test</option>
+                                <option value="refactor">Refactor</option>
+                                <option value="documentation">Documentation</option>
+                                <option value="bug_fix">Bug Fix</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Goal</label>
+                            <textarea id="goal" placeholder="Describe what needs to be done..." required></textarea>
+                        </div>
+                        <button type="submit">Create Run</button>
+                    </form>
+                </div>
+                
+                <!-- Runs List -->
+                <div class="card">
+                    <h2>
+                        Recent Runs
+                        <button class="secondary refresh-btn" onclick="loadRuns()">Refresh</button>
+                    </h2>
+                    <div id="runs-list">
+                        <div class="loading">Loading runs...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column: Run Detail -->
+            <div>
+                <div id="run-detail" class="card detail-panel">
+                    <h2>Run Detail</h2>
+                    <div id="detail-content">
+                        <p>Select a run to view details</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Configuration
+        const API_BASE = 'http://localhost:8000';
+        
+        // State
+        let currentRunId = null;
+        let runs = [];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRuns();
+            
+            // Form submission
+            document.getElementById('create-run-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await createRun();
+            });
+        });
+        
+        // Show error
+        function showError(message) {
+            const errorDiv = document.getElementById('error-display');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Load runs
+        async function loadRuns() {
+            try {
+                const response = await fetch(`${API_BASE}/runs?limit=20`);
+                if (!response.ok) throw new Error('Failed to load runs');
+                
+                const data = await response.json();
+                runs = data.runs || [];
+                renderRunsList();
+            } catch (error) {
+                console.error('Error loading runs:', error);
+                document.getElementById('runs-list').innerHTML = `
+                    <div class="error">Failed to load runs. Is the API running?</div>
+                `;
+            }
+        }
+        
+        // Render runs list
+        function renderRunsList() {
+            const container = document.getElementById('runs-list');
+            
+            if (runs.length === 0) {
+                container.innerHTML = '<div class="empty-state">No runs yet</div>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <ul class="run-list">
+                    ${runs.map(run => `
+                        <li class="run-item ${run.id === currentRunId ? 'active' : ''}" 
+                            onclick="selectRun('${run.id}')">
+                            <div class="run-header">
+                                <span class="run-id">${run.id.substring(0, 8)}</span>
+                                <span class="run-state state-${run.state}">${run.state}</span>
+                            </div>
+                            <div class="run-goal">${escapeHtml(run.goal)}</div>
+                            <div class="run-meta">
+                                ${run.repo_id} • ${run.task_type} • 
+                                ${new Date(run.created_at).toLocaleString()}
+                            </div>
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
+        }
+        
+        // Select run
+        async function selectRun(runId) {
+            currentRunId = runId;
+            renderRunsList(); // Re-render to show active state
+            
+            const run = runs.find(r => r.id === runId);
+            if (!run) return;
+            
+            // Show detail panel
+            const detailPanel = document.getElementById('run-detail');
+            detailPanel.classList.add('active');
+            
+            // Load run details
+            await loadRunDetail(run);
+        }
+        
+        // Load run detail
+        async function loadRunDetail(run) {
+            const container = document.getElementById('detail-content');
+            
+            container.innerHTML = '<div class="loading">Loading details...</div>';
+            
+            try {
+                // Load events
+                const eventsResponse = await fetch(`${API_BASE}/events/run/${run.id}`);
+                const eventsData = eventsResponse.ok ? await eventsResponse.json() : { events: [] };
+                
+                // Load patches
+                const patchesResponse = await fetch(`${API_BASE}/patches/run/${run.id}`);
+                const patchesData = patchesResponse.ok ? await patchesResponse.json() : { patches: [] };
+                
+                renderRunDetail(run, eventsData.events || [], patchesData.patches || []);
+            } catch (error) {
+                console.error('Error loading run detail:', error);
+                container.innerHTML = '<div class="error">Failed to load details</div>';
+            }
+        }
+        
+        // Render run detail
+        function renderRunDetail(run, events, patches) {
+            const container = document.getElementById('detail-content');
+            
+            container.innerHTML = `
+                <div class="section">
+                    <h3>Information</h3>
+                    <p><strong>ID:</strong> ${run.id}</p>
+                    <p><strong>State:</strong> <span class="run-state state-${run.state}">${run.state}</span></p>
+                    <p><strong>Repository:</strong> ${run.repo_id}</p>
+                    <p><strong>Task Type:</strong> ${run.task_type}</p>
+                    <p><strong>Worker Profile:</strong> ${run.worker_profile}</p>
+                    <p><strong>Created:</strong> ${new Date(run.created_at).toLocaleString()}</p>
+                </div>
+                
+                <div class="section">
+                    <h3>Goal</h3>
+                    <p>${escapeHtml(run.goal)}</p>
+                </div>
+                
+                ${patches.length > 0 ? `
+                    <div class="section">
+                        <h3>Patches (${patches.length})</h3>
+                        ${patches.map(patch => `
+                            <div class="card" style="margin-bottom: 10px;">
+                                <p><strong>Status:</strong> 
+                                    <span class="run-state state-${patch.status}">${patch.status}</span>
+                                </p>
+                                <p><strong>Summary:</strong> ${escapeHtml(patch.summary || 'No summary')}</p>
+                                <p><strong>Created:</strong> ${new Date(patch.created_at).toLocaleString()}</p>
+                                
+                                ${patch.diff_text ? `
+                                    <div style="margin-top: 10px;">
+                                        <strong>Diff:</strong>
+                                        <div class="diff-viewer">${renderDiff(patch.diff_text)}</div>
+                                    </div>
+                                ` : ''}
+                                
+                                ${patch.status === 'proposed' ? `
+                                    <div class="approval-actions">
+                                        <button class="success" onclick="approvePatch('${patch.id}')">
+                                            ✓ Approve
+                                        </button>
+                                        <button class="danger" onclick="rejectPatch('${patch.id}')">
+                                            ✗ Reject
+                                        </button>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                
+                <div class="section">
+                    <h3>Event Log</h3>
+                    <div class="event-log">
+                        ${events.length === 0 ? '<p>No events yet</p>' : 
+                          events.map(e => `
+                            <div class="event-item">
+                                <div class="event-time">${new Date(e.timestamp).toLocaleTimeString()}</div>
+                                <div>
+                                    <span class="event-type">${e.type}</span>
+                                    ${e.payload ? `<span class="badge badge-info">${Object.keys(e.payload).length} fields</span>` : ''}
+                                </div>
+                            </div>
+                          `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Render diff
+        function renderDiff(diffText) {
+            if (!diffText) return '<p>No diff available</p>';
+            
+            const lines = diffText.split('\n');
+            return lines.map(line => {
+                let className = '';
+                if (line.startsWith('+')) className = 'diff-add';
+                else if (line.startsWith('-')) className = 'diff-remove';
+                else if (line.startsWith('@@') || line.startsWith('diff') || line.startsWith('index')) {
+                    className = 'diff-header';
+                }
+                return `<div class="diff-line ${className}">${escapeHtml(line)}</div>`;
+            }).join('');
+        }
+        
+        // Create run
+        async function createRun() {
+            const repoId = document.getElementById('repo-id').value;
+            const taskType = document.getElementById('task-type').value;
+            const goal = document.getElementById('goal').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/runs`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-Id': 'dashboard-user'
+                    },
+                    body: JSON.stringify({
+                        repo_id: repoId,
+                        task_type: taskType,
+                        goal: goal,
+                        constraints: {
+                            network: false,
+                            approval_required_for_patch_apply: true
+                        },
+                        worker_profile: 'gsd-default'
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.text();
+                    throw new Error(error);
+                }
+                
+                const data = await response.json();
+                
+                // Reset form
+                document.getElementById('create-run-form').reset();
+                
+                // Reload runs
+                await loadRuns();
+                
+                // Select the new run
+                selectRun(data.run_id);
+                
+            } catch (error) {
+                console.error('Error creating run:', error);
+                showError('Failed to create run: ' + error.message);
+            }
+        }
+        
+        // Approve patch
+        async function approvePatch(patchId) {
+            if (!confirm('Are you sure you want to approve this patch?')) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/approvals/run/${currentRunId}/patch/${patchId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-Id': 'dashboard-user'
+                    },
+                    body: JSON.stringify({
+                        decision: 'approve',
+                        reason: 'Approved via dashboard'
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to approve');
+                
+                // Reload detail
+                const run = runs.find(r => r.id === currentRunId);
+                await loadRunDetail(run);
+                
+            } catch (error) {
+                console.error('Error approving patch:', error);
+                showError('Failed to approve patch: ' + error.message);
+            }
+        }
+        
+        // Reject patch
+        async function rejectPatch(patchId) {
+            if (!confirm('Are you sure you want to reject this patch?')) return;
+            
+            try {
+                const response = await fetch(`${API_BASE}/approvals/run/${currentRunId}/patch/${patchId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-Id': 'dashboard-user'
+                    },
+                    body: JSON.stringify({
+                        decision: 'reject',
+                        reason: 'Rejected via dashboard'
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Failed to reject');
+                
+                // Reload detail
+                const run = runs.find(r => r.id === currentRunId);
+                await loadRunDetail(run);
+                
+            } catch (error) {
+                console.error('Error rejecting patch:', error);
+                showError('Failed to reject patch: ' + error.message);
+            }
+        }
+        
+        // Escape HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Auto-refresh every 10 seconds
+        setInterval(() => {
+            if (currentRunId) {
+                const run = runs.find(r => r.id === currentRunId);
+                if (run && !['completed', 'failed', 'cancelled'].includes(run.state)) {
+                    loadRunDetail(run);
+                }
+            }
+            loadRuns();
+        }, 10000);
+    </script>
+</body>
+</html>

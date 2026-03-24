@@ -51,7 +51,32 @@ alembic upgrade head
 uvicorn api.main:app --reload
 ```
 
-## Creating a Run
+## Using the Dashboard
+
+A minimal web dashboard is included for easy interaction:
+
+```bash
+# Start the runtime API (in one terminal)
+cd product/runtime
+uvicorn api.main:app --reload
+
+# Start the dashboard (in another terminal)
+cd product/ui/simple-dashboard
+python server.py
+```
+
+The dashboard will open automatically at http://localhost:8080
+
+Features:
+- Create new runs with a simple form
+- View all runs with state badges
+- Click a run to see details
+- View event log in real-time
+- View patch diffs with syntax highlighting
+- Approve or reject patches with one click
+- Auto-refreshes every 10 seconds
+
+## Creating a Run (API)
 
 ```bash
 curl -X POST http://localhost:8000/runs \
