@@ -6,6 +6,7 @@
 
 export interface ContextPackerInput {
   taskDescription: string;
+  worktreePath?: string;
   failingTestLogs?: string;
   candidateFiles: string[];
   repoDocs?: string[];

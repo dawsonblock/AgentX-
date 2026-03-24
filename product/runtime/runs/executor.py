@@ -17,6 +17,7 @@ from ..patches.service import PatchService
 from ..approvals.service import ApprovalService
 from ..artifacts.service import ArtifactService
 from ..provenance.trace_writer.service import ProvenanceService
+from ..retrieval.context_service import get_service as get_context_service
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -230,7 +231,7 @@ class RunExecutor:
             run: Run object
             
         Returns:
-            Context dictionary
+            Context dictionary with real file contents
         """
         await self._transition_state(run, "context_building")
         
@@ -239,22 +240,31 @@ class RunExecutor:
         if not worktree:
             raise RuntimeError("No worktree found for run")
         
-        # Build context using retrieval service
-        # For now, return a basic context structure
-        context = {
-            "task": run.goal,
-            "worktree_path": worktree.path,
-            "files": [],  # Would be populated by retrieval service
-            "task_type": run.task_type
-        }
+        # Build context using context service
+        context_service = get_context_service()
+        
+        logger.info(f"Building context for run {run.id} from {worktree.path}")
+        
+        context = context_service.build_context(
+            worktree_path=worktree.path,
+            task_description=run.goal,
+            candidate_files=None  # Auto-discover
+        )
+        
+        # Record provenance
+        files_selected = [f["path"] for f in context.get("files", [])]
+        total_size = sum(f.get("size", 0) for f in context.get("files", []))
         
         self.provenance_service.record_context_building(
             run_id=run.id,
             task=run.goal,
-            files_selected=[],
-            context_size=0,
-            retrieval_method="basic"
+            files_selected=files_selected,
+            context_size=total_size,
+            retrieval_method="file_discovery"
         )
+        
+        logger.info(f"Built context with {context.get('file_count', 0)} files "
+                   f"({total_size} bytes) for run {run.id}")
         
         return context
 
