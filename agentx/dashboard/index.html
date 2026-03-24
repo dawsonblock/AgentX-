@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentX Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/diff.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a2e;
+            --bg-tertiary: #252542;
+            --bg-card: #16162a;
+            --text-primary: #e4e4e7;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --accent-success: #22c55e;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+            --accent-info: #3b82f6;
+            --border-color: #27273a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 24px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-brand i {
+            color: var(--accent-primary);
+        }
+
+        .header-brand h1 {
+            font-size: 20px;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Layout */
+        .container {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            height: calc(100vh - 64px);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .nav-item i {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Main Content */
+        .main {
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .page {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-header h2 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title i {
+            color: var(--accent-primary);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+        }
+
+        .stat-icon.success { color: var(--accent-success); }
+        .stat-icon.warning { color: var(--accent-warning); }
+        .stat-icon.info { color: var(--accent-info); }
+        .stat-icon.danger { color: var(--accent-danger); }
+
+        .stat-content h3 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .stat-content p {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5558e3;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: var(--accent-success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--accent-danger);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 16px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tr:hover td {
+            background: var(--bg-tertiary);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-created { background: rgba(161, 161, 170, 0.2); color: var(--text-secondary); }
+        .badge-queued { background: rgba(59, 130, 246, 0.2); color: var(--accent-info); }
+        .badge-running { background: rgba(139, 92, 246, 0.2); color: var(--accent-secondary); }
+        .badge-waiting { background: rgba(245, 158, 11, 0.2); color: var(--accent-warning); }
+        .badge-approved { background: rgba(34, 197, 94, 0.2); color: var(--accent-success); }
+        .badge-rejected { background: rgba(239, 68, 68, 0.2); color: var(--accent-danger); }
+        .badge-completed { background: rgba(34, 197, 94, 0.2); color: var(--accent-success); }
+        .badge-failed { background: rgba(239, 68, 68, 0.2); color: var(--accent-danger); }
+        .badge-proposed { background: rgba(245, 158, 11, 0.2); color: var(--accent-warning); }
+        .badge-applied { background: rgba(34, 197, 94, 0.2); color: var(--accent-success); }
+
+        /* Run Detail */
+        .run-detail {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .run-detail {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                display: none;
+            }
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border-color);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 2px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+        }
+
+        .timeline-item.completed::before {
+            background: var(--accent-success);
+            border-color: var(--accent-success);
+        }
+
+        .timeline-item.active::before {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            animation: pulse 2s infinite;
+        }
+
+        .timeline-time {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        .timeline-title {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .timeline-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* Diff Viewer */
+        .diff-viewer {
+            background: #0d1117;
+            border-radius: 8px;
+            overflow: hidden;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .diff-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .diff-title {
+            font-size: 13px;
+            color: #8b949e;
+        }
+
+        .diff-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .diff-content {
+            padding: 16px;
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .diff-content pre {
+            margin: 0;
+            background: transparent;
+        }
+
+        .diff-content code {
+            background: transparent;
+            padding: 0;
+        }
+
+        /* Event Log */
+        .event-log {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 12px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .event-item {
+            display: flex;
+            gap: 12px;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .event-item:last-child {
+            border-bottom: none;
+        }
+
+        .event-time {
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .event-type {
+            color: var(--accent-primary);
+            flex-shrink: 0;
+            min-width: 120px;
+        }
+
+        .event-payload {
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Approval Actions */
+        .approval-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+            color: var(--text-muted);
+        }
+
+        .empty-state h3 {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px 18px;
+            min-width: 300px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toast.success { border-left: 3px solid var(--accent-success); }
+        .toast.error { border-left: 3px solid var(--accent-danger); }
+        .toast.warning { border-left: 3px solid var(--accent-warning); }
+
+        /* Loading */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 15, 35, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-content .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 16px;
+        }
+
+        /* Truncated text */
+        .truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-brand">
+            <i data-lucide="bot" size="24"></i>
+            <h1>AgentX Dashboard</h1>
+        </div>
+        <div class="header-status">
+            <span class="status-dot"></span>
+            <span id="connection-status">Connected</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="section-title">Main</div>
+            <nav>
+                <div class="nav-item active" data-page="dashboard">
+                    <i data-lucide="layout-dashboard" size="18"></i>
+                    <span>Dashboard</span>
+                </div>
+                <div class="nav-item" data-page="runs">
+                    <i data-lucide="play-circle" size="18"></i>
+                    <span>Runs</span>
+                </div>
+                <div class="nav-item" data-page="patches">
+                    <i data-lucide="file-diff" size="18"></i>
+                    <span>Patches</span>
+                </div>
+            </nav>
+
+            <div class="section-title" style="margin-top: 24px;">Actions</div>
+            <nav>
+                <div class="nav-item" data-page="create">
+                    <i data-lucide="plus-circle" size="18"></i>
+                    <span>New Run</span>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Dashboard Page -->
+            <div class="page active" id="page-dashboard">
+                <div class="page-header">
+                    <h2>Dashboard</h2>
+                    <p>Overview of your coding workspace</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon info">
+                            <i data-lucide="play-circle" size="24"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="stat-total-runs">-</h3>
+                            <p>Total Runs</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon warning">
+                            <i data-lucide="clock" size="24"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="stat-pending">-</h3>
+                            <p>Pending Approval</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <i data-lucide="check-circle" size="24"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="stat-completed">-</h3>
+                            <p>Completed</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon danger">
+                            <i data-lucide="x-circle" size="24"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="stat-failed">-</h3>
+                            <p>Failed</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <i data-lucide="activity" size="18"></i>
+                            Recent Activity
+                        </div>
+                        <button class="btn btn-secondary" onclick="refreshDashboard()">
+                            <i data-lucide="refresh-cw" size="14"></i>
+                            Refresh
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table id="recent-runs-table">
+                            <thead>
+                                <tr>
+                                    <th>Run ID</th>
+                                    <th>Task</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Runs Page -->
+            <div class="page" id="page-runs">
+                <div class="page-header">
+                    <h2>Runs</h2>
+                    <p>View and manage all runs</p>
+                </div>
+
+                <div class="card">
+                    <div class="table-container">
+                        <table id="all-runs-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Task</th>
+                                    <th>Repository</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patches Page -->
+            <div class="page" id="page-patches">
+                <div class="page-header">
+                    <h2>Patches</h2>
+                    <p>Review and approve code patches</p>
+                </div>
+
+                <div id="patches-list">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Create Run Page -->
+            <div class="page" id="page-create">
+                <div class="page-header">
+                    <h2>Create New Run</h2>
+                    <p>Submit a coding task to the agent</p>
+                </div>
+
+                <div class="card" style="max-width: 600px;">
+                    <form id="create-run-form">
+                        <div class="form-group">
+                            <label class="form-label">Repository Path or URL</label>
+                            <input type="text" class="form-input" id="repo-input" placeholder="./my-repo or https://github.com/..." required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Task Description</label>
+                            <textarea class="form-textarea" id="task-input" placeholder="Describe what you want the agent to do..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i data-lucide="play" size="16"></i>
+                            Start Run
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Run Detail Page -->
+            <div class="page" id="page-run-detail">
+                <div class="page-header">
+                    <h2>Run Details</h2>
+                    <p id="run-detail-id">-</p>
+                </div>
+
+                <div class="run-detail">
+                    <div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i data-lucide="git-commit" size="18"></i>
+                                    Execution Timeline
+                                </div>
+                            </div>
+                            <div class="timeline" id="run-timeline">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i data-lucide="scroll-text" size="18"></i>
+                                    Event Log
+                                </div>
+                            </div>
+                            <div class="event-log" id="event-log">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="card" id="patch-card" style="display: none;">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i data-lucide="file-diff" size="18"></i>
+                                    Generated Patch
+                                </div>
+                                <span class="badge" id="patch-status-badge">-</span>
+                            </div>
+                            <div class="diff-viewer">
+                                <div class="diff-header">
+                                    <span class="diff-title">diff --git changes</span>
+                                    <div class="diff-actions">
+                                        <button class="btn btn-secondary" onclick="copyDiff()">
+                                            <i data-lucide="copy" size="14"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="diff-content">
+                                    <pre><code class="language-diff" id="patch-diff-content"></code></pre>
+                                </div>
+                            </div>
+                            <div class="approval-actions" id="approval-actions">
+                                <button class="btn btn-success" onclick="approvePatch()">
+                                    <i data-lucide="check" size="16"></i>
+                                    Approve & Apply
+                                </button>
+                                <button class="btn btn-danger" onclick="rejectPatch()">
+                                    <i data-lucide="x" size="16"></i>
+                                    Reject
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i data-lucide="info" size="18"></i>
+                                    Run Information
+                                </div>
+                            </div>
+                            <div id="run-info">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p id="loading-text">Processing...</p>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE = window.location.hostname === 'localhost' 
+            ? 'http://localhost:8000' 
+            : '';
+
+        // State
+        let currentRunId = null;
+        let currentPatchId = null;
+        let autoRefreshInterval = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            initNavigation();
+            initCreateForm();
+            loadDashboard();
+            startAutoRefresh();
+        });
+
+        // Navigation
+        function initNavigation() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const page = item.dataset.page;
+                    navigateTo(page);
+                    
+                    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                    item.classList.add('active');
+                });
+            });
+        }
+
+        function navigateTo(page, params = {}) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            
+            if (page === 'run-detail' && params.runId) {
+                currentRunId = params.runId;
+                document.getElementById('page-run-detail').classList.add('active');
+                loadRunDetail(params.runId);
+            } else {
+                document.getElementById(`page-${page}`).classList.add('active');
+            }
+            
+            if (page === 'dashboard') loadDashboard();
+            if (page === 'runs') loadRuns();
+            if (page === 'patches') loadPatches();
+        }
+
+        // Dashboard
+        async function loadDashboard() {
+            try {
+                const response = await fetch(`${API_BASE}/runs/`);
+                const runs = await response.json();
+                
+                // Update stats
+                document.getElementById('stat-total-runs').textContent = runs.length;
+                document.getElementById('stat-pending').textContent = runs.filter(r => r.state === 'waiting_approval').length;
+                document.getElementById('stat-completed').textContent = runs.filter(r => r.state === 'completed').length;
+                document.getElementById('stat-failed').textContent = runs.filter(r => r.state === 'failed').length;
+                
+                // Update recent runs table
+                const tbody = document.querySelector('#recent-runs-table tbody');
+                tbody.innerHTML = runs.slice(0, 5).map(run => `
+                    <tr>
+                        <td><code>${run.id.slice(0, 8)}</code></td>
+                        <td class="truncate" style="max-width: 300px;">${escapeHtml(run.task)}</td>
+                        <td>${getStateBadge(run.state)}</td>
+                        <td>${formatDate(run.created_at)}</td>
+                        <td>
+                            <button class="btn btn-secondary" onclick="navigateTo('run-detail', {runId: '${run.id}'})" style="padding: 6px 12px; font-size: 12px;">
+                                View
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                showToast('Failed to load dashboard', 'error');
+            }
+        }
+
+        function refreshDashboard() {
+            loadDashboard();
+            showToast('Dashboard refreshed', 'success');
+        }
+
+        // Runs
+        async function loadRuns() {
+            try {
+                const response = await fetch(`${API_BASE}/runs/`);
+                const runs = await response.json();
+                
+                const tbody = document.querySelector('#all-runs-table tbody');
+                tbody.innerHTML = runs.map(run => `
+                    <tr>
+                        <td><code>${run.id.slice(0, 8)}</code></td>
+                        <td class="truncate" style="max-width: 250px;">${escapeHtml(run.task)}</td>
+                        <td>${escapeHtml(run.repo)}</td>
+                        <td>${getStateBadge(run.state)}</td>
+                        <td>${formatDate(run.created_at)}</td>
+                        <td>
+                            <button class="btn btn-secondary" onclick="navigateTo('run-detail', {runId: '${run.id}'})" style="padding: 6px 12px; font-size: 12px;">
+                                View
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                showToast('Failed to load runs', 'error');
+            }
+        }
+
+        // Patches
+        async function loadPatches() {
+            // This would need a dedicated endpoint - for now show message
+            document.getElementById('patches-list').innerHTML = `
+                <div class="empty-state">
+                    <i data-lucide="file-diff" size="48"></i>
+                    <h3>No Patches to Review</h3>
+                    <p>Create a run to generate patches</p>
+                    <button class="btn btn-primary" onclick="navigateTo('create')" style="margin-top: 16px;">
+                        Create Run
+                    </button>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        // Create Run
+        function initCreateForm() {
+            document.getElementById('create-run-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const repo = document.getElementById('repo-input').value;
+                const task = document.getElementById('task-input').value;
+                
+                showLoading('Starting run...');
+                
+                try {
+                    const response = await fetch(`${API_BASE}/runs/`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ repo, task })
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to create run');
+                    
+                    const data = await response.json();
+                    hideLoading();
+                    showToast('Run created successfully', 'success');
+                    
+                    // Reset form
+                    document.getElementById('create-run-form').reset();
+                    
+                    // Navigate to run detail
+                    navigateTo('run-detail', { runId: data.run_id });
+                } catch (error) {
+                    hideLoading();
+                    showToast(error.message, 'error');
+                }
+            });
+        }
+
+        // Run Detail
+        async function loadRunDetail(runId) {
+            document.getElementById('run-detail-id').textContent = `Run ID: ${runId}`;
+            
+            try {
+                const response = await fetch(`${API_BASE}/runs/${runId}`);
+                const run = await response.json();
+                
+                // Update timeline
+                updateTimeline(run);
+                
+                // Update run info
+                document.getElementById('run-info').innerHTML = `
+                    <div class="form-group">
+                        <label class="form-label">Repository</label>
+                        <div class="form-input" style="background: var(--bg-tertiary);">${escapeHtml(run.repo)}</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Task</label>
+                        <div class="form-textarea" style="background: var(--bg-tertiary); min-height: auto;">${escapeHtml(run.task)}</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <div>${getStateBadge(run.state)}</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Created</label>
+                        <div style="color: var(--text-secondary);">${formatDate(run.created_at)}</div>
+                    </div>
+                `;
+                
+                // Show patch if available
+                if (run.patches && run.patches.length > 0) {
+                    const patch = run.patches[0];
+                    currentPatchId = patch.id;
+                    await loadPatchDetail(patch.id);
+                } else {
+                    document.getElementById('patch-card').style.display = 'none';
+                }
+                
+                // Load events
+                loadEventLog(runId);
+                
+            } catch (error) {
+                showToast('Failed to load run details', 'error');
+            }
+        }
+
+        function updateTimeline(run) {
+            const states = [
+                { id: 'created', label: 'Created', desc: 'Run initialized' },
+                { id: 'queued', label: 'Queued', desc: 'Waiting for executor' },
+                { id: 'provisioning', label: 'Provisioning', desc: 'Allocating worktree' },
+                { id: 'context', label: 'Context', desc: 'Building context' },
+                { id: 'running', label: 'Running', desc: 'Worker executing' },
+                { id: 'waiting_approval', label: 'Waiting Approval', desc: 'Patch ready for review' },
+                { id: 'approved', label: 'Approved', desc: 'Approval recorded' },
+                { id: 'completed', label: 'Completed', desc: 'Run finished' }
+            ];
+            
+            const currentIndex = states.findIndex(s => s.id === run.state);
+            
+            document.getElementById('run-timeline').innerHTML = states.map((state, index) => {
+                const isCompleted = index < currentIndex || (currentIndex === -1 && run.state === 'completed');
+                const isActive = index === currentIndex;
+                const isRejected = run.state === 'rejected' && state.id === 'waiting_approval';
+                
+                return `
+                    <div class="timeline-item ${isCompleted ? 'completed' : ''} ${isActive ? 'active' : ''}">
+                        <div class="timeline-time">${isCompleted || isActive ? '✓' : '○'}</div>
+                        <div class="timeline-title">${state.label}</div>
+                        <div class="timeline-desc">${isRejected ? 'Patch was rejected' : state.desc}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function loadPatchDetail(patchId) {
+            try {
+                const response = await fetch(`${API_BASE}/patches/${patchId}`);
+                const patch = await response.json();
+                
+                document.getElementById('patch-card').style.display = 'block';
+                document.getElementById('patch-status-badge').textContent = patch.status;
+                document.getElementById('patch-status-badge').className = `badge badge-${patch.status}`;
+                
+                // Show/hide approval actions based on status
+                const approvalActions = document.getElementById('approval-actions');
+                if (patch.status === 'proposed' || patch.status === 'waiting_approval') {
+                    approvalActions.style.display = 'flex';
+                } else {
+                    approvalActions.style.display = 'none';
+                }
+                
+                // Display diff
+                const diffContent = document.getElementById('patch-diff-content');
+                diffContent.textContent = patch.diff || 'No diff available';
+                hljs.highlightElement(diffContent);
+                
+            } catch (error) {
+                showToast('Failed to load patch', 'error');
+            }
+        }
+
+        async function loadEventLog(runId) {
+            // This would need a dedicated endpoint - simulated for now
+            document.getElementById('event-log').innerHTML = `
+                <div class="event-item">
+                    <span class="event-time">${new Date().toLocaleTimeString()}</span>
+                    <span class="event-type">run_created</span>
+                    <span class="event-payload">Run ${runId.slice(0, 8)} created</span>
+                </div>
+            `;
+        }
+
+        // Approval Actions
+        async function approvePatch() {
+            if (!currentPatchId) return;
+            
+            showLoading('Applying patch and running CI...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/approvals/${currentPatchId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ decision: 'approve', reason: 'Approved via dashboard' })
+                });
+                
+                const data = await response.json();
+                hideLoading();
+                
+                if (data.status === 'applied') {
+                    showToast('Patch approved and applied successfully', 'success');
+                } else if (data.status === 'ci_failed') {
+                    showToast('Patch approved but CI failed', 'warning');
+                } else {
+                    showToast('Patch approval failed', 'error');
+                }
+                
+                // Reload run detail
+                loadRunDetail(currentRunId);
+                
+            } catch (error) {
+                hideLoading();
+                showToast(error.message, 'error');
+            }
+        }
+
+        async function rejectPatch() {
+            if (!currentPatchId) return;
+            
+            if (!confirm('Are you sure you want to reject this patch?')) return;
+            
+            showLoading('Rejecting patch...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/approvals/${currentPatchId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ decision: 'reject', reason: 'Rejected via dashboard' })
+                });
+                
+                hideLoading();
+                showToast('Patch rejected', 'success');
+                
+                // Reload run detail
+                loadRunDetail(currentRunId);
+                
+            } catch (error) {
+                hideLoading();
+                showToast(error.message, 'error');
+            }
+        }
+
+        // Utilities
+        function getStateBadge(state) {
+            const badges = {
+                'created': 'badge-created',
+                'queued': 'badge-queued',
+                'provisioning': 'badge-running',
+                'context': 'badge-running',
+                'running': 'badge-running',
+                'waiting_approval': 'badge-waiting',
+                'approved': 'badge-approved',
+                'rejected': 'badge-rejected',
+                'completed': 'badge-completed',
+                'failed': 'badge-failed',
+                'proposed': 'badge-proposed',
+                'applied': 'badge-applied'
+            };
+            const badgeClass = badges[state] || 'badge-created';
+            return `<span class="badge ${badgeClass}">${state.replace(/_/g, ' ')}</span>`;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleString();
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i data-lucide="${type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'alert-circle'}" size="18"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 4000);
+        }
+
+        function showLoading(text) {
+            document.getElementById('loading-text').textContent = text;
+            document.getElementById('loading-overlay').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-overlay').style.display = 'none';
+        }
+
+        function copyDiff() {
+            const diff = document.getElementById('patch-diff-content').textContent;
+            navigator.clipboard.writeText(diff);
+            showToast('Diff copied to clipboard', 'success');
+        }
+
+        function startAutoRefresh() {
+            autoRefreshInterval = setInterval(() => {
+                if (document.getElementById('page-dashboard').classList.contains('active')) {
+                    loadDashboard();
+                }
+                if (currentRunId && document.getElementById('page-run-detail').classList.contains('active')) {
+                    loadRunDetail(currentRunId);
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
