@@ -1,0 +1,25 @@
+name: Snyk Docker Security
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly
+  workflow_dispatch:
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Build Runtime image
+        run: |
+          docker build -t product-runtime:latest \
+            -f product/infra/docker/Dockerfile.runtime .
+      
+      - name: Run Snyk to check Docker image
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: product-runtime:latest
+          args: --severity-threshold=high

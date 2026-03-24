@@ -1,0 +1,11 @@
+Runtime Database Migrations
+
+This directory contains Alembic migrations for the Product Runtime database.
+
+Commands:
+  alembic revision --autogenerate -m "Description"
+  alembic upgrade head
+  alembic downgrade -1
+
+Environment:
+  Set RUNTIME_DATABASE_URL to override the default database URL.

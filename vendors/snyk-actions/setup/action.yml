@@ -1,0 +1,32 @@
+name: "Setup Snyk"
+description: "Installs a specific version of Snyk"
+author: "Gareth Rushgrove"
+branding:
+  icon: "alert-triangle"
+  color: "yellow"
+inputs:
+  snyk-version:
+    description: "Which Snyk version to install"
+    default: latest
+  os:
+    description: "Which Operating System Snyk will run on"
+    default: ${{ runner.os }}
+outputs:
+  version:
+    description: "The version of Snyk installed"
+    value: ${{ steps.version.outputs.version }}
+runs:
+  using: "composite"
+  steps:
+    - env:
+        INPUT_SNYK_VERSION: ${{ inputs.snyk-version }}
+        INPUT_OS: ${{ inputs.os }}
+      run: |
+        echo $GITHUB_ACTION_PATH
+        echo ${{ github.action_path }}
+        
+        ${{ github.action_path }}/setup_snyk.sh "${INPUT_SNYK_VERSION}" "${INPUT_OS}" || $GITHUB_ACTION_PATH/setup_snyk.sh "${INPUT_SNYK_VERSION}" "${INPUT_OS}"
+      shell: bash
+    - id: version
+      shell: bash
+      run: echo "version=$(snyk version)" >> $GITHUB_OUTPUT

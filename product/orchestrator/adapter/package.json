@@ -1,0 +1,17 @@
+{
+  "name": "@product/orchestrator-adapter",
+  "version": "1.0.0",
+  "description": "Orchestrator adapter for bounded coding workspace",
+  "main": "dist/service.js",
+  "types": "dist/service.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

@@ -1,0 +1,24 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install tree-sitter and other dependencies for code analysis
+RUN pip install --no-cache-dir \
+    fastapi \
+    uvicorn \
+    tree-sitter \
+    tree-sitter-python \
+    tree-sitter-javascript \
+    tree-sitter-typescript
+
+# Copy codegraph service
+COPY product/retrieval/codegraph_service/ ./codegraph/
+
+# Set environment
+ENV PYTHONPATH=/app
+
+# Expose port
+EXPOSE 8000
+
+# Start server
+CMD uvicorn codegraph.app:app --host 0.0.0.0 --port 8000

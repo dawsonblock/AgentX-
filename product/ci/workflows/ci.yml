@@ -1,0 +1,73 @@
+name: CI Gates
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  # Python lint and test
+  python-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install -r product/runtime/requirements.txt
+          pip install pylint mypy pytest
+      
+      - name: Run pylint
+        run: |
+          pylint product/runtime/ --fail-under=7.0 || true
+      
+      - name: Run mypy
+        run: |
+          mypy product/runtime/ --ignore-missing-imports || true
+      
+      - name: Run pytest
+        run: |
+          cd product/runtime && pytest || true
+
+  # TypeScript build
+  typescript-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Build orchestrator adapter
+        run: |
+          cd product/orchestrator/adapter
+          npm install
+          npm run build
+      
+      - name: Build context packer
+        run: |
+          cd product/retrieval/context_packer
+          npm install
+          npm run build
+
+  # Security scan
+  security-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/python@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high

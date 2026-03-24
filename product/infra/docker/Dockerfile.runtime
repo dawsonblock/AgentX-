@@ -1,0 +1,22 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install dependencies
+COPY product/runtime/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy runtime code
+COPY product/runtime/ ./runtime/
+
+# Set environment
+ENV PYTHONPATH=/app
+ENV RUNTIME_DATABASE_URL=postgresql://product:product@postgres:5432/product_runtime
+
+# Expose port
+EXPOSE 8000
+
+# Run migrations and start server
+CMD cd runtime && \
+    alembic upgrade head && \
+    uvicorn api.main:app --host 0.0.0.0 --port 8000

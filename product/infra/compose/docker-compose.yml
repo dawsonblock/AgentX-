@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database
+  postgres:
+    image: postgres:16-alpine
+    container_name: product-postgres
+    environment:
+      POSTGRES_USER: product
+      POSTGRES_PASSWORD: product
+      POSTGRES_DB: product_runtime
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U product"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - product-network
+
+  # Runtime API
+  runtime:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.runtime
+    container_name: product-runtime
+    environment:
+      RUNTIME_DATABASE_URL: postgresql://product:product@postgres:5432/product_runtime
+      WORKTREE_ROOT: /var/lib/product/worktrees
+    volumes:
+      - worktrees:/var/lib/product/worktrees
+      - repos:/repos
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - product-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Open WebUI (from vendor)
+  ui:
+    build:
+      context: ../../../vendors/open-webui
+      dockerfile: Dockerfile
+    container_name: product-ui
+    environment:
+      OLLAMA_BASE_URL: ""  # Disable Ollama
+      PRODUCT_RUNTIME_URL: http://runtime:8000
+    ports:
+      - "3000:8080"
+    depends_on:
+      - runtime
+    networks:
+      - product-network
+
+  # CodeGraph service
+  codegraph:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.codegraph
+    container_name: product-codegraph
+    environment:
+      RUNTIME_API_URL: http://runtime:8000
+    ports:
+      - "8001:8000"
+    volumes:
+      - repos:/repos:ro
+    networks:
+      - product-network
+
+volumes:
+  postgres_data:
+  worktrees:
+  repos:
+
+networks:
+  product-network:
+    driver: bridge

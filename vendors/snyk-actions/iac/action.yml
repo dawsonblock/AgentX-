@@ -1,0 +1,32 @@
+name: "Snyk Infrastructure as Code"
+description: "Check your Infrastructure as Code fields for issues using Snyk"
+author: "Gareth Rushgrove"
+branding:
+  icon: "alert-triangle"
+  color: "yellow"
+inputs:
+  command:
+    description: "Which Snyk command to run, defaults to test"
+    default: test
+  args:
+    description: "Additional arguments to pass to Snyk"
+  file:
+    description: "File to test"
+  json:
+    description: "Output a snyk.json file with results if running the test command"
+    default: false
+  sarif:
+    description: "Output a snyk.sarif file with results if running the test command"
+    default: true
+runs:
+  using: "docker"
+  image: "docker://snyk/snyk:alpine"
+  env:
+    SNYK_INTEGRATION_NAME: GITHUB_ACTIONS
+    SNYK_INTEGRATION_VERSION: iac
+  args:
+  - snyk
+  - iac
+  - ${{ inputs.command }}
+  - ${{ inputs.file }}
+  - ${{ inputs.args }}
