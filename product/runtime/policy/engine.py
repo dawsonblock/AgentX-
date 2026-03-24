@@ -53,6 +53,7 @@ class PolicyEngine:
         "repo.read_tree",
         "file.read",
         "file.read_batch",
+        "file.write",
         
         # Search
         "search.text",

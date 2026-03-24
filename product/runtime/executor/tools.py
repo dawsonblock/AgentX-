@@ -353,11 +353,56 @@ def typecheck_run(args: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def write_file(args: Dict[str, Any]) -> Dict[str, Any]:
+    """Write a file in the worktree.
+    
+    Args:
+        args: Tool arguments
+            - worktree_path: Path to worktree
+            - path: File path (relative to worktree)
+            - content: Content to write
+    
+    Returns:
+        Tool result
+    """
+    worktree_path = args.get("worktree_path", ".")
+    file_path = args.get("path")
+    content = args.get("content")
+    
+    if not file_path:
+        raise ToolError("path is required")
+    
+    if content is None:
+        raise ToolError("content is required")
+    
+    # Ensure path is within worktree
+    full_path = Path(worktree_path) / file_path
+    full_path = full_path.resolve()
+    worktree_resolved = Path(worktree_path).resolve()
+    
+    if not str(full_path).startswith(str(worktree_resolved)):
+        raise ToolError(f"Path '{file_path}' is outside worktree")
+    
+    # Ensure parent directory exists
+    full_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Write file
+    full_path.write_text(content)
+    
+    return {
+        "exit_code": 0,
+        "path": str(file_path),
+        "bytes_written": len(content.encode('utf-8')),
+        "duration_ms": 0
+    }
+
+
 # Tool registry
 TOOL_MAP = {
     "test.run": run_tests,
     "file.read": read_file,
     "file.read_batch": read_file_batch,
+    "file.write": write_file,
     "search.text": search_text,
     "git.status": git_status,
     "git.diff": git_diff,
